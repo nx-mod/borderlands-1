@@ -67,8 +67,11 @@ Secure  SecureConnection Register (0xB/1)
 - bl-sdk/unrealsdk (LGPL-3.0) — Borderlands 1 Enhanced (the PC base of this port) struct
   layouts and globals: `src/unrealsdk/game/bl1e/` (UObject/UField 104 bytes, UStruct
   SuperField +120 / Children +128 / PropertyLink +176, UClass ClassDefaultObject +468).
-  Local reference copy in `bl1-hack/refs/unrealsdk` (not committed). Offsets are PC x64;
-  confirm on the aarch64 Switch build before use.
+  Offsets are PC x64; confirm on the aarch64 Switch build before use.
+
+Local clones (not committed, shallow) in `switch-cfw/refs/`: `unrealsdk`,
+`NintendoClients`, `NintendoClients.wiki` (protocol pages: Matchmake-Extension-Protocol.md,
+Secure-Protocol.md, …). `bl1-hack/refs/unrealsdk` keeps the few BL1E files read first.
 
 ## Online stack: Nintendo NEX
 
