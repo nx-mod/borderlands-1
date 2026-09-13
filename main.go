@@ -101,7 +101,13 @@ func main() {
 
 	mm := nex.NewMatchmaking()
 	secureEndpoint.Register(nex.ProtocolSecureConnection, nex.SecureConnectionHandler())
-	secureEndpoint.Register(nex.ProtocolMatchmakeExtension, mm.ExtensionHandler())
+	extHandler := mm.ExtensionHandler()
+	secureEndpoint.Register(nex.ProtocolMatchmakeExtension, func(c *nex.Connection, req *nex.RMCMessage) *nex.RMCMessage {
+		if req.Method == methodUpdateMatchmakeSessionAttribute {
+			return updateSessionAttributes(c, req, extHandler)
+		}
+		return extHandler(c, req)
+	})
 	secureEndpoint.Register(nex.ProtocolMatchMaking, mm.MatchMakingHandler())
 	secureEndpoint.Register(nex.ProtocolMatchMakingExt, mm.MatchMakingExtHandler())
 	secureEndpoint.Register(nex.ProtocolNATTraversal, nex.NATTraversalHandler())
@@ -148,6 +154,33 @@ func main() {
 	if err := secureServer.ListenSecure(securePort, certFile, keyFile); err != nil {
 		fmt.Printf("[BL1 Secure] stopped: %v\n", err)
 	}
+}
+
+// MatchmakeExtension UpdateMatchmakeSessionAttribute. Borderlands calls it right after
+// opening a public lobby: u32 gid + qList<u32> (its 6 session attributes, 32-byte body).
+const methodUpdateMatchmakeSessionAttribute = 12
+
+// updateSessionAttributes answers UpdateMatchmakeSessionAttribute. nextendo-nex has no handler
+// for it and refuses with Core::NotImplemented, which stops the lobby. Each attribute is applied
+// through the core's ModifyCurrentGameAttribute handler (same owner check, same store, so later
+// searches see them), then the call is acknowledged with an empty success.
+func updateSessionAttributes(c *nex.Connection, req *nex.RMCMessage, ext nex.RMCHandler) *nex.RMCMessage {
+	in := nex.NewStreamIn(req.Body, c.Settings)
+	gid := in.U32()
+	attribs := nex.ReadList(in, func(i *nex.StreamIn) uint32 { return i.U32() })
+	fmt.Printf("[BL1 Secure] UpdateMatchmakeSessionAttribute pid=%d gid=%d attribs=%v\n", c.PID, gid, attribs)
+
+	for index, value := range attribs {
+		out := nex.NewStreamOut(c.Settings)
+		out.U32(gid)
+		out.U32(uint32(index))
+		out.U32(value)
+		sub := *req
+		sub.Method = nex.MethodModifyCurrentGameAttribute
+		sub.Body = out.Bytes()
+		ext(c, &sub)
+	}
+	return nex.NewRMCSuccess(c.Settings, nex.ProtocolMatchmakeExtension, req.Method, req.CallID, nil)
 }
 
 // resolveUser maps a LoginEx username to an account, as the other Nextendo NEX servers do:
