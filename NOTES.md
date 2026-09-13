@@ -33,6 +33,43 @@ Keep this file updated as you go: it is the map for this server.
 - bl1-hack log file: while the game runs, sys-ftpd shows `log.txt` locked at 0 bytes; close
   the game before pulling it.
 
+## First live session (2026-09-13, CFW Switch)
+
+Login and hosting work up to the lobby attributes:
+
+```
+Auth    TicketGranting ValidateAndRequestTicketWithParam (0xA/6)  username = console NSA id
+        -> nextendo-account /api/nsa -> Nextendo PID (1800000003 on the local stack)
+Secure  SecureConnection Register (0xB/1)
+        MatchmakeExtension CreateMatchmakeSessionWithParam (0x6D/38) -> gid 1
+        NATTraversal ReportNATProperties (0x3/5)
+        MatchmakeExtension OpenParticipation (0x6D/2)
+        MatchmakeExtension UpdateMatchmakeSessionPart (0x6D/44)
+        MatchmakeExtension UpdateMatchmakeSessionAttribute (0x6D/12)  <- was NotImplemented
+```
+
+- **2306-0103** "starting game lobby" / switching friends-only → online = the core refusing
+  0x6D/12 with Core::NotImplemented. 12 = `UpdateMatchmakeSessionAttribute(u32 gid,
+  List<u32> attribs)`, no return value (NintendoClients wiki); Borderlands sends 6 attributes.
+  Handled in main.go by applying each through the core's ModifyCurrentGameAttribute.
+  The lobby still switched to public in the menu: creation and OpenParticipation succeeded.
+- **2122-0002 "unable to load data"** at game start: module 2122 is **BCAT** (background
+  data delivery), not NEX. The console's `bcat-list …/nx_data_010064800f66a000` and
+  `bcat-topics …/010064800f66a000` go through baas-proxy to the real Nintendo CDN and come
+  back 304 Not Modified. Not this server's job; revisit if it blocks anything.
+- Joiners will need Browse (0x6D/4, /5, /42) or AutoMatchmake (/3, /15, /33, /40) — watch
+  for them as NotImplemented in the log.
+
+## References
+
+- kinnay/NintendoClients wiki — NEX protocol method ids and parameters
+  (https://github.com/kinnay/NintendoClients/wiki/Matchmake-Extension-Protocol), Switch error modules.
+- bl-sdk/unrealsdk (LGPL-3.0) — Borderlands 1 Enhanced (the PC base of this port) struct
+  layouts and globals: `src/unrealsdk/game/bl1e/` (UObject/UField 104 bytes, UStruct
+  SuperField +120 / Children +128 / PropertyLink +176, UClass ClassDefaultObject +468).
+  Local reference copy in `bl1-hack/refs/unrealsdk` (not committed). Offsets are PC x64;
+  confirm on the aarch64 Switch build before use.
+
 ## Online stack: Nintendo NEX
 
 Found in the binary's symbols (Unreal Engine 3, `WillowGame`, Gearbox framework):
