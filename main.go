@@ -7,8 +7,8 @@
 //   - auth   (:443 behind sni-router)  TicketGranting — LoginEx issues the Kerberos ticket.
 //   - secure (:60012)                  SecureConnection + matchmaking + NAT traversal + ranking + utility.
 //
-// Still unknown (see NOTES.md): the NEX access key, the game server ID the game resolves
-// (g<id>-lp1.s.n.srv.nintendo.net), and the exact NEX/Pia versions. bl1-hack logs them.
+// Known (see NOTES.md): game server 0x241c6800 (g241c6800-lp1.s.n.srv.nintendo.net, routed
+// by sni-router) and access key 018165a5. Still unknown: the exact NEX/Pia versions.
 package main
 
 import (
@@ -33,9 +33,10 @@ const (
 )
 
 var (
-	// accessKey is Borderlands' NEX access key (8 hex chars). Not recovered yet: it is
-	// set through nn::nex::BackEndServices::SetSandboxAccessKey, which bl1-hack logs.
-	accessKey  = envOr("BL1_ACCESS_KEY", "")
+	// accessKey is Borderlands' NEX access key: the literal the game passes to
+	// nn::nex::BackEndServices::SetSandboxAccessKey (logged by bl1-hack on a CFW Switch,
+	// 2026-09-13). It sits in rodata right before the UOnlineSubsystemSwitch strings.
+	accessKey  = envOr("BL1_ACCESS_KEY", "018165a5")
 	nexVersion = envOrInt("BL1_NEX_VERSION", 40000)
 
 	nextendoHost   = envOr("NEXTENDO_HOST", "127.0.0.1")

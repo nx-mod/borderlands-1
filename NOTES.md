@@ -10,8 +10,8 @@ Keep this file updated as you go: it is the map for this server.
     NSO build id `1c37c3673e0e4e7aadf7860078d55f63`
   - segments: text @0x0 (31.4 MB), rodata @0x01DFA000, data @0x03178000
   - Ghidra: `bl1-hack/tools/ghidra_scripts/AddNsoSegments <dir> 0x01DFA000 0x03178000`
-- Status (2026-09-13): stack identified; **game server ID 0x241c6800** (live); access key
-  candidate **018165a5** (static, unverified).
+- Status (2026-09-13): **game server ID 0x241c6800** and **access key 018165a5** both
+  confirmed live; sni-router routes the host to this server (auth :8456, secure :60012).
 
 ## Identified
 
@@ -20,9 +20,16 @@ Keep this file updated as you go: it is the map for this server.
   login, when "searching lobbies". The same u32 is in rodata at VA 0x1FBD6A7. With no
   sni-router route it fell through to baas-proxy → real Nextendo, which answered a plain
   200 (no upgrade) → "server communication error".
-- **Access key candidate `018165a5`**: the only 8-hex string in rodata next to the online
-  code, immediately before the `UOnlineSubsystemSwitch` exec strings. Verify with the first
-  accepted PRUDP CONNECT, or bl1-hack's `SetSandboxAccessKey` log.
+- **Access key `018165a5` — confirmed.** bl1-hack logged the game passing that literal to
+  `BackEndServices::SetSandboxAccessKey` and `StreamManager::SetSandboxAccessKey` (x1 =
+  the C string in rodata, right before the `UOnlineSubsystemSwitch` exec strings; x0 = a
+  16-byte nn::nex::String whose second word holds the same 8 ASCII bytes).
+- Login flow seen: `nsd resolve 'g241c6800-%.s.n.srv.nintendo.net'` →
+  `g241c6800-lp1…`, getaddrinfo → 192.168.137.1, non-blocking connect to :443 (from
+  main+0x3660), retried three times while no server answered.
+- With no server, starting a public lobby crashed the game: 2124-0400, SDK abort on
+  `QueuedThread2`. Most likely the game's own handling of a dead NEX login; recheck with
+  the server up.
 - bl1-hack log file: while the game runs, sys-ftpd shows `log.txt` locked at 0 bytes; close
   the game before pulling it.
 
