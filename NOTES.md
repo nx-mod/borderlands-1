@@ -5,7 +5,7 @@ Keep this file updated as you go: it is the map for this server.
 - Game: Borderlands: Game of the Year Edition, title `010064800F66A000`
 - Binary: `sd:/atmosphere/contents/010064800F66A000/exefs/main` (an Atmosphere exefs
   override: may be a patched main, not stock — confirm before trusting offsets).
-  Copy + segments in `nextendo/bl1-hack/capture/nso/` (gitignored).
+  Copy + segments in `bl1-hack/capture/nso/` (not in this repository).
   - SHA-256 `2051DA55540AEC785619A717B07EC01D7B9616F6789F24D7AA8DFBCCAE950305`,
     NSO build id `1c37c3673e0e4e7aadf7860078d55f63`
   - segments: text @0x0 (31.4 MB), rodata @0x01DFA000, data @0x03178000
@@ -25,7 +25,7 @@ Keep this file updated as you go: it is the map for this server.
   the C string in rodata, right before the `UOnlineSubsystemSwitch` exec strings; x0 = a
   16-byte nn::nex::String whose second word holds the same 8 ASCII bytes).
 - Login flow seen: `nsd resolve 'g241c6800-%.s.n.srv.nintendo.net'` →
-  `g241c6800-lp1…`, getaddrinfo → 192.168.137.1, non-blocking connect to :443 (from
+  `g241c6800-lp1…`, getaddrinfo → <router IP>, non-blocking connect to :443 (from
   main+0x3660), retried three times while no server answered.
 - With no server, starting a public lobby crashed the game: 2124-0400, SDK abort on
   `QueuedThread2`. Most likely the game's own handling of a dead NEX login; recheck with
@@ -69,7 +69,7 @@ Secure  SecureConnection Register (0xB/1)
   SuperField +120 / Children +128 / PropertyLink +176, UClass ClassDefaultObject +468).
   Offsets are PC x64; confirm on the aarch64 Switch build before use.
 
-Local clones (not committed, shallow) in `switch-cfw/refs/`: `unrealsdk`,
+Local shallow clones (not committed): `unrealsdk`,
 `NintendoClients`, `NintendoClients.wiki` (protocol pages: Matchmake-Extension-Protocol.md,
 Secure-Protocol.md, …). `bl1-hack/refs/unrealsdk` keeps the few BL1E files read first.
 
@@ -108,6 +108,5 @@ Found in the binary's symbols (Unreal Engine 3, `WillowGame`, Gearbox framework)
 
 ## Method
 
-Instrument first (see `nextendo/diablo-3/NOTES.md` §6): `nextendo/bl1-hack` is an exlaunch
-module that logs name resolution, sockets and the access key to
-`sd:/config/bl1-hack/log.txt`.
+Instrument first: `bl1-hack` (an exlaunch module, not part of this repository) logs name
+resolution, sockets and the access key to `sd:/config/bl1-hack/log.txt`.
