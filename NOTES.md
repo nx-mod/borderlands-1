@@ -96,7 +96,13 @@ Found in the binary's symbols (Unreal Engine 3, `WillowGame`, Gearbox framework)
 1. NEX access key → `BL1_ACCESS_KEY` (bl1-hack logs `SetSandboxAccessKey`).
 2. Game server ID → sni-router route + hosts (bl1-hack logs `nn::nsd::ResolveEx`).
 3. NEX / Pia versions → `BL1_NEX_VERSION`, matchmaking/station handling.
-4. Which protocols/methods the game calls after login (the server logs every unhandled RMC).
+4. Which protocols/methods the game calls after login. Every RMC nextendo-nex does
+   not implement falls through to the endpoint fallback (empty success + a log
+   line) and is now also recorded structurally: `unhandled.go` counts each
+   proto/method with a body sample, surfaced on the dashboard under
+   `/api/stats` → `unhandled` (most-called first). Watch that list against a live
+   console to see exactly what to implement next; `UpdateMatchmakeSessionAttribute`
+   (0x6D/12) was the first such gap and is handled in `main.go`.
 
 ## Ports (local stack)
 
