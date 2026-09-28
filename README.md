@@ -1,5 +1,7 @@
 # borderlands-1
 
+*(still in alpha testing)*
+
 **A new game server implementation by nx-mod** for the Nextendo Network.
 
 NEX game server for **Borderlands: Game of the Year Edition** (Nintendo Switch, `010064800F66A000`), built on the NextendoNetwork [nextendo-nex](https://github.com/NextendoNetwork/nextendo-nex) core. Source only — no binaries, no certs, no game assets. Not affiliated with Gearbox, 2K or Nintendo.
