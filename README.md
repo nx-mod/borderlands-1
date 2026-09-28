@@ -64,3 +64,7 @@ Game: Borderlands: Game of the Year Edition, title `010064800F66A000`, game serv
 - **[Pretendo Network](https://pretendo.network)** — NEX documentation ([developer docs](https://developer.pretendo.network/overview/nex)).
 
 References were read and reimplemented; no code was copied.
+
+## Credits
+
+Built by nx-mod for the **Nextendo Network**, on the work of the Nextendo Network team — https://nextendo.network. Nextendo is awesome.
